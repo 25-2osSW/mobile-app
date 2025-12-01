@@ -94,7 +94,7 @@ class _LLMTestPageState extends State<LLMTestPage> {
           _modelLoaded = true;
           _status = "✅ 덴지가 준비되었습니다!";
           // 덴지 첫 인사 추가
-          //_messages.add(ChatMessage(text: "어, 왔냐? 배고픈데 뭐 없냐?", isUser: false));
+          
         });
       } else {
         setState(() {
