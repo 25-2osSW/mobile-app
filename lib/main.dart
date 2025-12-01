@@ -109,7 +109,7 @@ class _LLMTestPageState extends State<LLMTestPage> {
       _messages.add(ChatMessage(text: "...", isUser: false, time: ""));
     });
     _scrollToBottom();
-
+    //프롬프트 수정 12월1일
     // 프롬프트 (덴지 페르소나)
     String prompt = """
 <|begin_of_text|><|start_header_id|>system<|end_header_id|>
