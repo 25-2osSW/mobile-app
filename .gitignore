@@ -1,0 +1,42 @@
+# Flutter & Dart 기본 무시파일
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+build/
+
+# Flutter 플랫폼 별 빌드 폴더
+android/.gradle/
+android/.idea/
+android/app/build/
+android/build/
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+
+# 플랫폼 빌드 산출물
+linux/build/
+macos/Flutter/ephemeral/
+windows/flutter/ephemeral/
+
+# 우리가 추가한 큰 파일 제외
+# 1) 모델 파일 제외
+*.gguf
+assets/models/
+
+# 2) C++ native build 결과물 제외
+android/llama_build/build/
+android/llama_build/llama_src/
+android/.cxx/
+
+# 3) 전체 assets 제외 (용량 1.1GB)
+assets/
+
+# 4) web build 산출물 제외
+web/
+
+# 5) 기타
+*.log
+.DS_Store
+.idea/
