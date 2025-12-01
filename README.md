@@ -1,73 +1,104 @@
-1단계: .gitignore 설정 (가장 중요)
-프로젝트 루트 폴더(C:\Users\muyer\StudioProjects\kanana_llm_app)에 있는 .gitignore 파일을 메모장이나 VS Code로 여세요. 그리고 맨 아래에 다음 내용들을 추가해서 저장하세요. (무거운 파일들이 깃에 추적되지 않게 막는 설정입니다.)
+Kanana LLM (Denji Persona) - On-Device Chatbot 📱
+이 프로젝트는 서버 연결 없이 안드로이드 기기 내에서(On-Device) 대규모 언어 모델(LLM)을 구동하는 챗봇 애플리케이션입니다. 카카오의 Kanana 2.1B 모델을 기반으로 만화 '체인소맨'의 주인공 '덴지' 페르소나를 학습(LoRA Fine-tuning)시켰으며, Flutter와 C++(JNI)을 연동하여 구현했습니다.
 
-코드 스니펫
+✨ Key Features (핵심 기능)
+100% On-Device Inference: 인터넷 연결 없이 안드로이드 CPU(NPU)만으로 LLM을 구동합니다.
 
-# --- 기존 내용 아래에 추가하세요 ---
+Custom C++ Wrapper: llama.cpp 라이브러리를 JNI로 직접 포팅하여 메모리 안정성을 확보했습니다.
 
-# 1. 모델 파일 제외 (너무 큼)
-*.gguf
-assets/models/
+불안정한 Sampler 대신 Manual Greedy Search 구현.
 
-# 2. C++ 빌드 결과물 제외 (우리가 수동 빌드한 것들)
-android/llama_build/build/
-android/llama_build/llama_src/
-# 단, 소스코드는 올려야 하니 필요한 파일만 남기고 빌드 부산물은 빼야 함
-# (만약 llama.cpp 전체 소스를 다 올리기 부담스러우면 위처럼 제외하고
-# 나중에 clone 받을 때 submodule 등을 쓰는 게 정석이지만,
-# 일단 편하게 하려면 build 폴더만이라도 꼭 제외하세요.)
+Repetition Penalty(반복 방지) 로직 자체 구현.
 
-# 3. 안드로이드 네이티브 빌드 캐시 제외
-android/.cxx/
-android/app/build/
-android/build/
-2단계: 용량 다이어트 (청소)
-터미널(PowerShell 또는 CMD)에서 프로젝트 폴더로 이동한 뒤, 아래 명령어로 찌꺼기 파일들을 삭제합니다.
+Stop Word(출력 제어) 감지 로직으로 환각(Hallucination) 및 자문자답 방지.
 
-Flutter 빌드 파일 삭제:
+Context Cache Management로 연속된 대화 처리.
+
+Persona Tuning: '덴지' 캐릭터의 말투와 성격을 반영한 LoRA 파인튜닝 모델 적용.
+
+Optimized Performance: ARM NEON, FP16, DotProduct 가속을 적용한 Native 빌드.
+
+🛠️ Tech Stack
+Frontend: Flutter (Dart)
+
+Native Interface: Java (MethodChannel) ↔ C++ (JNI)
+
+Inference Engine: llama.cpp (Custom Build)
+
+Model: Kanana-2.1B-Instruct (GGUF Quantized q4_0)
+
+Build System: CMake, Android NDK
+
+🚀 Installation & Build Guide
+이 프로젝트는 대용량 파일(모델, 빌드 부산물)을 제외하고 소스코드만 업로드되어 있습니다. 실행을 위해서는 C++ 라이브러리 빌드와 모델 파일 준비가 필요합니다.
+
+1. Prerequisites (준비사항)
+Flutter SDK
+
+Android Studio & Android SDK
+
+Android NDK (r26d 권장)
+
+CMake
+
+Linux 환경 (WSL2 또는 Mac/Linux) - 빌드 스크립트 실행용
+
+2. Build Native Library (중요!)
+앱을 실행하기 전에 llama.cpp 엔진을 안드로이드용 공유 라이브러리(.so)로 컴파일해야 합니다.
+
+android/llama_build 디렉토리로 이동합니다.
 
 Bash
 
-flutter clean
-(이 명령어를 치면 build 폴더가 사라지고 프로젝트가 엄청 가벼워집니다.)
+cd android/llama_build
+빌드 스크립트를 실행합니다. (NDK 경로가 환경변수에 설정되어 있거나 스크립트 내 경로를 수정해야 함)
 
-C++ 빌드 파일 수동 삭제: 탐색기를 열어서 android/llama_build/build 폴더가 있다면 삭제하세요. (나중에 build_android.sh 돌리면 다시 생기니까요.)
+Bash
 
-이렇게 하면 8GB였던 프로젝트가 소스코드만 남아서 아마 50MB~100MB 내외로 확 줄어들 겁니다. android 폴더도 flutter clean을 하고 나면 확 줄어듭니다.
+# WSL 또는 Linux 터미널에서 실행
+chmod +x build_android.sh
+./build_android.sh
+빌드가 성공하면 android/app/src/main/jniLibs/arm64-v8a/libllama_jni.so 파일이 생성됩니다.
 
-3단계: 깃허브에 올리기 (명령어)
-이제 가벼워진 프로젝트를 깃허브에 올립니다. 보여주신 깃허브 화면의 명령어를 참고하여 진행합니다.
+3. Prepare Model File
+학습된 .gguf 모델 파일(약 1.2GB)은 용량 문제로 깃허브에 포함되지 않았습니다.
 
-VS Code 터미널이나 PowerShell에서 순서대로 입력하세요.
+kanana2.1b-q4_0.gguf 파일을 준비하여 스마트폰의 저장소(Download 폴더 등)에 넣습니다.
 
-PowerShell
+앱 실행 후 "GGUF 모델 파일 선택" 버튼을 눌러 해당 파일을 로드합니다.
 
-# 1. 깃 초기화 (이미 되어있을 수도 있지만 확실하게)
-git init
+4. Run App
+Bash
 
-# 2. 모든 파일 스테이징 (이제 .gitignore 덕분에 무거운 건 안 들어감)
-git add .
+flutter pub get
+flutter run
+📂 Project Structure
+kanana_llm_app/
+├── lib/
+│   ├── main.dart          # 채팅 UI 및 비즈니스 로직
+│   └── kanana_llm.dart    # MethodChannel을 통한 JNI 통신
+├── android/
+│   ├── app/src/main/java/ # Java Native Interface (JNI) Bridge
+│   └── llama_build/       # [핵심] C++ 소스 및 빌드 스크립트
+│       ├── llama_src/     # llama.cpp 코어 소스 (최적화됨)
+│       ├── llama_wrapper.cpp # JNI 구현체 (메모리 관리, 추론 로직)
+│       ├── CMakeLists.txt # NDK 빌드 설정
+│       └── build_android.sh # 자동 빌드 스크립트
+└── ...
+📝 Troubleshooting History
+개발 과정에서 발생했던 주요 이슈와 해결 방법입니다.
 
-# 3. 커밋 (저장)
-git commit -m "Initial commit - Kanana LLM Chatbot Finished"
+Android 13+ 권한 문제: Permission.storage가 작동하지 않는 문제를 시스템 기본 FilePicker를 사용하여 권한 요청 없이 파일 접근이 가능하도록 해결.
 
-# 4. 브랜치 이름 설정 (main)
-git branch -M main
+App Crash (Segmentation Fault): llama.cpp의 최신 API 변경으로 인한 메모리 충돌을 확인. llama_batch_get_one 대신 수동으로 배치를 할당하고 logits 플래그를 직접 제어하여 해결.
 
-# 5. 원격 저장소 연결 (님 깃허브 주소)
-git remote add origin https://github.com/25-2osSW/mobile-app.git
+무한 반복 생성: 모델이 같은 말을 반복하는 현상을 C++ 레벨에서 Repetition Penalty 로직을 추가하여 해결.
 
-# 6. 푸시 (업로드)
-git push -u origin main
-(만약 remote origin already exists 에러가 나면 5번은 건너뛰고 6번만 하세요.)
+Self-Conversation (자문자답): 모델이 User 역할까지 수행하려는 문제를 Stop Word 감지 로직으로 해결.
 
-💡 주의사항 (다른 사람이 받을 때)
-이렇게 올리면 **모델 파일(.gguf)**과 **C++ 빌드 결과물(.so)**은 깃허브에 안 올라갑니다. (이게 정상입니다.)
+📄 License
+This project is based on llama.cpp and uses a fine-tuned version of Kanana model.
 
-나중에 다른 사람(또는 교수님)이 이 코드를 받아서 실행하려면:
+llama.cpp: MIT License
 
-assets/models/ 폴더에 kanana2.1b-q4_0.gguf 파일을 직접 넣어줘야 하고,
-
-android/llama_build/ 폴더에서 ./build_android.sh를 한 번 실행해줘야 한다고 README.md 파일에 적어두시면 완벽합니다.
-
-이제 업로드 진행해보세요!
+Kanana Model: Follows Kakao Corp's License Policy.
