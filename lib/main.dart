@@ -317,8 +317,8 @@ $text<|eot_id|>
               image: DecorationImage(
                 // msg.isUser가 true면 내 사진, false면 덴지 사진
                 image: AssetImage(msg.isUser
-                    ? "assets/images/user.png"   // 내 프사 파일명
-                    : "assets/images/denji.png"  // 덴지 프사 파일명
+                    ? "assets/images/user.png"   // 내 프사 파일명 업로드
+                    : "assets/images/denji.png"  // 덴지 프사 파일명 업로드
                 ),
                 fit: BoxFit.cover, // 네모 칸에 꽉 차게 조절
               ),
